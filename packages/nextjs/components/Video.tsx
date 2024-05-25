@@ -35,7 +35,7 @@ const VideoToFrames: React.FC = () => {
     }
   };
 
-  const extractFrames = () => {
+  const extractFrames = async () => {
     const videoElement = videoRef.current;
     const canvasElement = canvasRef.current;
     if (videoElement && canvasElement) {
@@ -46,7 +46,11 @@ const VideoToFrames: React.FC = () => {
         ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 
         const frameDataUrl = canvasElement.toDataURL("image/png");
-        setFrames(prevFrames => [...prevFrames, frameDataUrl]);
+        setFrames(prevFrames => {
+          const newFrames = [...prevFrames, frameDataUrl];
+          console.log("New frames array:", newFrames); // Debug log
+          return newFrames;
+        });
 
         extractTextFromFrame(frameDataUrl, frames.length);
 
@@ -85,7 +89,7 @@ const VideoToFrames: React.FC = () => {
   const displayFrames = () => {
     const previewContainer = document.getElementById("previewContainer");
     if (previewContainer) {
-      previewContainer.innerHTML = ""; // Clear previous frames
+      previewContainer.innerHTML; // Clear previous frames
 
       frames.forEach(frame => {
         const img = document.createElement("img");

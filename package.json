@@ -45,6 +45,7 @@
     "node": ">=18.17.0"
   },
   "dependencies": {
+    "idb": "^8.0.0",
     "tesseract.js": "^5.1.0"
   }
 }

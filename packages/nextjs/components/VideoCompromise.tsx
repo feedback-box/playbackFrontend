@@ -230,7 +230,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
       <canvas ref={canvasRef} style={{ display: "none" }} />
       <div>
         {frames.map((frame, index) => (
-          <img key={index} src={frame} alt={`Frame ${index}`} /> // eslint-disable-line
+          <img key={index} src={frame} alt={`Frame ${index}`} /> // eslint-disable-line 
         ))}
       </div>
       <button onClick={createVideo}>Create Video</button>

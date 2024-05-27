@@ -85,6 +85,8 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
               const normalizedText = words.map(word => word.text.trim().toLowerCase()).join(" ");
               // Compromise NLP
               const doc = nlp(normalizedText);
+
+              // This needs testing with a bunch of different documents to see if it works as expected, aka they have to inlcude Emails and phonenumbers
               const privateEntities = [
                 ...doc.people().out("array"),
                 ...doc.match("#Email").out("array"),

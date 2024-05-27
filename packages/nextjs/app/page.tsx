@@ -4,8 +4,7 @@ import Link from "next/link";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import NoSSRWrapper from "~~/components/NoSSRWrapper";
-import VideoCompromise from "~~/components/VideoCompromise";
+import App from "~~/components/App";
 import { Address } from "~~/components/scaffold-eth";
 
 const Home: NextPage = () => {
@@ -64,9 +63,7 @@ const Home: NextPage = () => {
               </p>
             </div>
           </div>
-          <NoSSRWrapper>
-            <VideoCompromise />
-          </NoSSRWrapper>
+          <App />
         </div>
       </div>
     </>

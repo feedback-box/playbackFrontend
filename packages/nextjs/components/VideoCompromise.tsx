@@ -5,9 +5,10 @@ import nlp from "compromise";
 import { openDB } from "idb";
 import Tesseract from "tesseract.js";
 
-export default function VideoCompromise() {
+const VideoCompromise = ({ taskID }: { taskID: string }) => {
   const [frames, setFrames] = useState<string[]>([]);
   const [videoURL, setVideoURL] = useState<string | null>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // IF you want to change the frame rate you HAVE TO CHANGE fmfpeg.exec() in createVideo()
@@ -16,7 +17,7 @@ export default function VideoCompromise() {
   ffmpeg.on("log", ({ message }) => {
     console.log(message);
   });
-  const keywordsToRedact = ["example", "private", "URL", "\\bhttps?://[^\\s]+\\b"];
+  const keywordsToRedact = ["ffmpeg", , "medium", "URL", "\\bhttps?://[^\\s]+\\b"];
 
   useEffect(() => {
     async function initializeDB() {
@@ -26,7 +27,21 @@ export default function VideoCompromise() {
         },
       });
     }
+    async function getWalletAddress() {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          setWalletAddress(accounts[0]);
+        } catch (error) {
+          console.error("User denied account access");
+        }
+      } else {
+        console.error("MetaMask not detected");
+      }
+    }
+
     initializeDB();
+    getWalletAddress();
   }, []);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,7 +99,7 @@ export default function VideoCompromise() {
                 const lowerCaseText = word.text.toLowerCase();
                 const shouldRedact =
                   privateTexts.has(lowerCaseText) ||
-                  keywordsToRedact.some(keyword => new RegExp(keyword, "i").test(lowerCaseText));
+                  keywordsToRedact.some(keyword => new RegExp(keyword || "", "i").test(lowerCaseText));
 
                 if (shouldRedact) {
                   context.fillStyle = "black"; // Redaction color
@@ -140,6 +155,30 @@ export default function VideoCompromise() {
     retrieveFrames();
   }, []);
 
+  const sendFramesToBackend = async () => {
+    const db = await openDB("framesDB", 1);
+    const allFrames = await db.getAll("frames");
+
+    for (const { frame, id } of allFrames) {
+      const response = await fetch("https://your-backend-endpoint.com/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ walletAddress, taskID, frame, id }),
+      });
+
+      if (!response.ok) {
+        console.error(`Failed to send frame ${id}`);
+        return;
+      }
+    }
+
+    // Clear IndexedDB after successfully sending frames
+    await db.clear("frames");
+    setFrames([]);
+  };
+
   const createVideo = async () => {
     const db = await openDB("framesDB", 1);
     const allFrames = await db.getAll("frames");
@@ -193,6 +232,7 @@ export default function VideoCompromise() {
         ))}
       </div>
       <button onClick={createVideo}>Create Video</button>
+      <button onClick={sendFramesToBackend}>Send Frames to Backend</button>
       {videoURL && (
         <div>
           <h2>Generated Video</h2>
@@ -204,4 +244,5 @@ export default function VideoCompromise() {
       )}
     </div>
   );
-}
+};
+export default VideoCompromise;

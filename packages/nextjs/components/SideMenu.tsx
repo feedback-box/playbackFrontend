@@ -8,34 +8,26 @@ const SideMenu: React.FC = () => {
   return (
     <div className="side-menu">
       <Link href="/">
-        <a className="logo-placeholder">
-          <FontAwesomeIcon icon={faHome} size="2x" />
-        </a>
+        <FontAwesomeIcon icon={faHome} size="2x" />
       </Link>
       <nav>
         <ul>
           <li>
-            <Link href="/marketplace">
-              <a>Marketplace</a>
-            </Link>
+            <Link href="/marketplace">Marketpalce</Link>
           </li>
           <li>
-            <Link href="/earn">
-              <a>Earn $BACK</a>
-            </Link>
+            <Link href="/earn">Earn $BACK</Link>
           </li>
           <li>
-            <Link href="/settings">
-              <a>Settings</a>
-            </Link>
+            <Link href="/settings">Settings</Link>
           </li>
         </ul>
       </nav>
       <div className="social-icons">
-        <a href="https://twitter.com/yourproject" target="_blank" rel="noopener noreferrer">
+        <a href="https://twitter.com/fabbaist" target="_blank" rel="noopener noreferrer">
           <FontAwesomeIcon icon={faTwitter} size="2x" />
         </a>
-        <a href="https://telegram.com/yourproject" target="_blank" rel="noopener noreferrer">
+        <a href="https://telegram.com/fabbaist" target="_blank" rel="noopener noreferrer">
           <FontAwesomeIcon icon={faTelegram} size="2x" />
         </a>
       </div>

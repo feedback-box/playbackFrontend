@@ -2085,7 +2085,7 @@ __metadata:
     eslint-config-prettier: ^8.5.0
     eslint-plugin-prettier: ^4.2.1
     idb: ^8.0.0
-    next: ^14.0.4
+    next: ^14.2.3
     next-themes: ^0.2.1
     nprogress: ^0.2.0
     postcss: ^8.4.16
@@ -10052,7 +10052,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next@npm:^14.0.4":
+"next@npm:^14.2.3":
   version: 14.2.3
   resolution: "next@npm:14.2.3"
   dependencies:

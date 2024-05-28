@@ -10,13 +10,15 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <SideMenu />
-      <div className="flex items-center flex-col flex-grow pt-10">
-        <span className="block text-2xl mt-2">
-          {connectedAddress ? `Connected: ${connectedAddress}` : "Not connected"}
-        </span>
+      <div className="flex flex-row w-full h-full">
+        <SideMenu />
+        <div className="flex items-center flex-col flex-grow pt-10">
+          <span className="block text-2xl mt-2">
+            {connectedAddress ? `Connected: ${connectedAddress}` : "Not connected"}
+          </span>
 
-        <PlayNetworkApp />
+          <PlayNetworkApp />
+        </div>
       </div>
     </>
   );

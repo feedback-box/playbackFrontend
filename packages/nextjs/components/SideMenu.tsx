@@ -1,14 +1,16 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { faTelegram, faTwitter } from "@fortawesome/free-brands-svg-icons";
-import { faHome } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const SideMenu: React.FC = () => {
   return (
     <div className="side-menu">
       <Link href="/">
-        <FontAwesomeIcon icon={faHome} size="2x" />
+        <div>
+          <Image alt="SE2 logo" className="cursor-pointer" width={100} height={100} src="/logo.svg" />
+        </div>
       </Link>
       <nav>
         <ul>

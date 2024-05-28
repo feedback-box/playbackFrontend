@@ -58,7 +58,7 @@ const TaskTable = () => {
               <td>{task.title}</td>
               <td>
                 {task.appImage && (
-                  <img src={task.appImage} width={35} height={35} alt="logo" className="rounded-full w-35 h-35" />
+                  <img src={task.appImage} width={35} height={35} alt="logo" className="rounded-full w-35 h-35" /> // eslint-disable-line
                 )}
               </td>
               <td>{task.owner}</td>

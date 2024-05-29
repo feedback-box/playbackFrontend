@@ -46,11 +46,15 @@ p {
 
 
 
-th {
-  padding: 4px;
+th, td {
+  padding: 15px;
 }
-td {
-  padding: 4px;
+
+.connect{
+  display: flex;
+  position: absolute;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .social-icons {
@@ -67,7 +71,8 @@ td {
 
 /* Model Styles */
 .modal-content {
-  background-color: white;
+  background-color: ;
+  
   padding: 20px;
   border-radius: 5px;
   width: 90%;
@@ -84,4 +89,10 @@ td {
   border: none;
   font-size: 16px;
   cursor: pointer;
+}
+
+.background {
+  background-image: url('../public/bg.jpg');
+  background-size: cover;
+
 }

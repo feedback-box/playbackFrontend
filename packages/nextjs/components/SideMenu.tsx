@@ -1,37 +1,93 @@
-import React from "react";
+import React, { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { faTelegram, faTwitter } from "@fortawesome/free-brands-svg-icons";
+import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Bars3Icon } from "@heroicons/react/24/outline";
+import { useOutsideClick } from "~~/hooks/scaffold-eth";
 
-const SideMenu: React.FC = () => {
+type SideMenuLink = {
+  label: string;
+  href: string;
+  icon?: React.ReactNode;
+};
+
+export const sideMenuLinks: SideMenuLink[] = [
+  {
+    label: "Earn $BACK",
+    href: "/earn",
+  },
+  {
+    label: "Marketplace",
+    href: "/marketplace",
+  },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: <FontAwesomeIcon icon={faCog} size="2x" />,
+  },
+];
+
+export const SideMenuLinks = () => {
+  const pathname = usePathname();
+
   return (
-    <div className="side-menu min-h-screen w-1/4 bg-white/15 p-4 flex flex-col items-center">
-      <Link href="/">
-        <div className="mb-16">
-          <Image alt="Playback Network logo" className="cursor-pointer" width={100} height={100} src="/logo.svg" />
+    <>
+      {sideMenuLinks.map(({ label, href, icon }) => {
+        const isActive = pathname === href;
+        return (
+          <li key={href}>
+            <Link
+              href={href}
+              passHref
+              className={`${
+                isActive ? "bg-secondary shadow-md" : ""
+              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-row items-center`}
+            >
+              {icon}
+              <span>{label}</span>
+            </Link>
+          </li>
+        );
+      })}
+    </>
+  );
+};
+
+export const SideMenu = () => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const burgerMenuRef = useRef<HTMLDivElement>(null);
+  useOutsideClick(
+    burgerMenuRef,
+    useCallback(() => setIsDrawerOpen(false), []),
+  );
+  return (
+    <div className="side-menu min-h-screen  bg-gray-800/90 p-4 flex flex-col items-center">
+      <div className="navbar-start w-auto">
+        <div className="drawer-navigation" ref={burgerMenuRef}>
+          <Link href="/" className="">
+            <Image alt="Playback Network logo" className="cursor-pointer" width={50} height={50} src="/logo.svg" />
+          </Link>
+          <label
+            tabIndex={0}
+            className={`btn btn-ghost ${isDrawerOpen ? "hover:bg-secondary" : "hover:bg-transparent"}`}
+            onClick={() => {
+              setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
+            }}
+          >
+            <Bars3Icon className=" h-1/3" />
+          </label>
+          {isDrawerOpen && (
+            <ul tabIndex={0} className=" mt-3 p-2 shadow w-52">
+              <SideMenuLinks />
+              <div className="mb-5 pb-10 text-l">Having an Issue? Reach out to us</div>
+            </ul>
+          )}
         </div>
-      </Link>
-      <nav className="flex-grow">
-        <ul className="flex flex-col items-center mt-auto list-none w-full">
-          <li className="mb-12 pb-4 pt-4 border-b-2 border-white w-3/4 mx-auto">
-            <Link href="/marketplace" className="text-lg font-bold">
-              Marketplace
-            </Link>
-          </li>
-          <li className="mb-12 pb-4 pt-4 border-b-2 border-white w-3/4 mx-auto">
-            <Link href="/earn" className="text-lg font-bold">
-              Earn $BACK
-            </Link>
-          </li>
-          <li className="mb-12 pb-4 pt-4 border-b-2 border-white w-3/4 ">
-            <Link href="/settings" className="text-lg font-bold ">
-              Settings
-            </Link>
-          </li>
-        </ul>
-      </nav>
-      <div className="mb-5 pb-10 text-l">Having any Issues? Reach out to us</div>
+      </div>
+
       <div className="social-icons">
         <a href="https://twitter.com/fabbaist" target="_blank" rel="noopener noreferrer">
           <FontAwesomeIcon icon={faTwitter} size="2x" />

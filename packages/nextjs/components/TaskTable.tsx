@@ -41,8 +41,8 @@ const TaskTable = () => {
   };
 
   return (
-    <div className="task-table">
-      <table className="w-full bg-white/20 rounded-lg">
+    <div className="task-table p-5">
+      <table className="w-full bg-white/20 rounded-lg ">
         <thead>
           <tr className="text-left">
             <th>Task</th>

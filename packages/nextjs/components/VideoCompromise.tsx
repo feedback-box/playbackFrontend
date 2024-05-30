@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+import { type Schema } from "../ressource";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
+import { generateClient } from "aws-amplify/api";
 import nlp from "compromise";
 import { openDB } from "idb";
 import Tesseract from "tesseract.js";
+import { useAccount } from "wagmi";
 
-const VideoCompromise = ({ taskID }: { taskID: string }) => {
+const VideoCompromise = () => {
   const [frames, setFrames] = useState<string[]>([]);
+  const { address: connectedAddress } = useAccount();
   const [videoURL, setVideoURL] = useState<string | null>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -42,6 +46,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
 
     initializeDB();
     getWalletAddress();
+    console.log("Wallet Address: ", walletAddress);
   }, []);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,29 +162,58 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
     retrieveFrames();
   }, []);
 
-  const sendFramesToBackend = async () => {
+  const sendFramesToBackendQL = async () => {
+    const taskID = "9b7018a5-b5f4-462f-9063-0b158d5c78ba";
     const db = await openDB("framesDB", 1);
     const allFrames = await db.getAll("frames");
 
-    for (const { frame, id } of allFrames) {
-      const response = await fetch("https://your-backend-endpoint.com/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ walletAddress, taskID, frame, id }),
-      });
-
-      if (!response.ok) {
-        console.error(`Failed to send frame ${id}`);
-        return;
-      }
+    if (!connectedAddress || !taskID) {
+      console.error("connectedAddress or taskID is not defined");
+      return;
     }
 
-    // Clear IndexedDB after successfully sending frames
+    const client = generateClient<Schema>();
+    console.log(client);
+
+    try {
+      const response = await client.mutations.createMedias({
+        walletAddress: connectedAddress,
+        taskId: taskID,
+        frames: JSON.stringify(allFrames.map(({ frame, id }) => ({ frame, id }))),
+      });
+
+      await console.log("All frames sent successfully", response);
+    } catch (error) {
+      console.error("Failed to send frames to backend:", error);
+    }
+
     await db.clear("frames");
     setFrames([]);
   };
+
+  // const sendFramesToBackend = async () => {
+  //   const db = await openDB("framesDB", 1);
+  //   const allFrames = await db.getAll("frames");
+
+  //   for (const { frame, id } of allFrames) {
+  //     const response = await fetch("https://your-backend-endpoint.com/upload", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ walletAddress, taskID, frame, id }),
+  //     });
+
+  //     if (!response.ok) {
+  //       console.error(`Failed to send frame ${id}`);
+  //       return;
+  //     }
+  //   }
+
+  //   // Clear IndexedDB after successfully sending frames
+  //   await db.clear("frames");
+  //   setFrames([]);
+  // };
 
   const createVideo = async () => {
     const db = await openDB("framesDB", 1);
@@ -234,7 +268,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
         ))}
       </div>
       <button onClick={createVideo}>Create Video</button>
-      <button onClick={sendFramesToBackend}>Send Frames to Backend</button>
+      <button onClick={sendFramesToBackendQL}>Send Frames to Backend</button>
       {videoURL && (
         <div>
           <h2>Generated Video</h2>

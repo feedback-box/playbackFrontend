@@ -65,7 +65,7 @@ const TaskTable = () => {
               <td>{task.price}</td>
               <td>
                 <button onClick={() => openModal(task.taskID)} className="bg-purple-600 px-4 py-2 rounded-lg">
-                  Earn
+                  Earn + $ {selectedTaskID}
                 </button>
               </td>
             </tr>
@@ -74,7 +74,7 @@ const TaskTable = () => {
       </table>
       <NoSSRWrapper>
         <Modal show={showModal} onClose={closeModal}>
-          {selectedTaskID && <VideoCompromise taskID={selectedTaskID} />}
+          <VideoCompromise />
         </Modal>
       </NoSSRWrapper>
     </div>

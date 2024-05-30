@@ -44,7 +44,21 @@ p {
   z-index: 1000;
 }
 
+.loadingBar{
+    margin-top: 10px;
+    width: 100%;
+    background-color: #f0f0f0;
+    padding: 10px;
+    text-align: center;
+}
 
+.dropzone {
+  border: 2px dashed #cccccc;
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
 
 th, td {
   padding: 15px;
@@ -71,8 +85,7 @@ th, td {
 
 /* Model Styles */
 .modal-content {
-  background-color: ;
-  
+    
   padding: 20px;
   border-radius: 5px;
   width: 90%;

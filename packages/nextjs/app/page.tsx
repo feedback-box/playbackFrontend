@@ -1,5 +1,7 @@
 "use client";
 
+import outputs from "../amplify_outputs.json";
+import { Amplify } from "aws-amplify";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import SideMenu from "~~/components/SideMenu";
@@ -7,6 +9,13 @@ import TaskTable from "~~/components/TaskTable";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
+
+  Amplify.configure({
+    ...outputs,
+    API: {
+      REST: outputs.custom.API,
+    },
+  });
 
   return (
     <>

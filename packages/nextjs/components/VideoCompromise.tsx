@@ -8,11 +8,11 @@ import { openDB } from "idb";
 import Tesseract from "tesseract.js";
 import { useAccount } from "wagmi";
 
-const VideoCompromise = () => {
+const VideoCompromise = ({ taskID }: { taskID: string }) => {
+  const [localtaskID] = useState(taskID);
   const [frames, setFrames] = useState<string[]>([]);
   const { address: connectedAddress } = useAccount();
   const [videoURL, setVideoURL] = useState<string | null>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // IF you want to change the frame rate you HAVE TO CHANGE fmfpeg.exec() in createVideo()
@@ -22,7 +22,7 @@ const VideoCompromise = () => {
     console.log(message);
   });
   const keywordsToRedact = ["ffmpeg", , "medium", "URL", "\\bhttps?://[^\\s]+\\b"];
-
+  console.log("You selected the task" + localtaskID);
   useEffect(() => {
     async function initializeDB() {
       await openDB("framesDB", 1, {
@@ -31,22 +31,7 @@ const VideoCompromise = () => {
         },
       });
     }
-    async function getWalletAddress() {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-          setWalletAddress(accounts[0]);
-        } catch (error) {
-          console.error("User denied account access");
-        }
-      } else {
-        console.error("MetaMask not detected");
-      }
-    }
-
     initializeDB();
-    getWalletAddress();
-    console.log("Wallet Address: ", walletAddress);
   }, []);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,23 +148,23 @@ const VideoCompromise = () => {
   }, []);
 
   const sendFramesToBackendQL = async () => {
-    const taskID = "9b7018a5-b5f4-462f-9063-0b158d5c78ba";
     const db = await openDB("framesDB", 1);
     const allFrames = await db.getAll("frames");
 
-    if (!connectedAddress || !taskID) {
+    if (!connectedAddress || !localtaskID) {
       console.error("connectedAddress or taskID is not defined");
       return;
     }
 
     const client = generateClient<Schema>();
     console.log(client);
+    const framesArray = allFrames.map(({ frame }) => frame);
 
     try {
       const response = await client.mutations.createMedias({
         walletAddress: connectedAddress,
-        taskId: taskID,
-        frames: JSON.stringify(allFrames.map(({ frame, id }) => ({ frame, id }))),
+        taskId: localtaskID,
+        frames: JSON.stringify(framesArray),
       });
 
       await console.log("All frames sent successfully", response);

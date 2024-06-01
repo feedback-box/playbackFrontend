@@ -25,8 +25,8 @@ const Modal = ({ show, onClose, children }: { show: boolean; onClose: () => void
   }
 
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content">
+    <div className="modal-overlay " onClick={handleOverlayClick}>
+      <div className="modal-content backdrop-blur-xl bg-white/15">
         <button className="modal-close" onClick={onClose}>
           Close
         </button>

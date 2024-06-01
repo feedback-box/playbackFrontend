@@ -24,11 +24,51 @@ p {
 }
 
 .btn {
-  @apply shadow-md;
+  --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
 .btn.btn-ghost {
-  @apply shadow-none;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.container-style {
+  height: 20;
+  width: 100%;
+  background-color: "#e0e0de";
+  border-radius: 50;
+  margin: 50;
+}
+
+.filler-style {
+  flex: 1;
+  height: '100%';
+  width: auto;
+  background-color: #6a1b9a;
+  border-radius: 'inherit' as const;
+  text-align: 'right';
+}
+
+.gradient-background {
+  background: linear-gradient(
+    -65deg,
+    #000000 0%, 
+    rgba(141, 255, 207, 0.35) 10%,  /* Light green with 69% opacity */
+    rgba(67, 135, 107, 0.80) 70%,  /* Darker green with 80% opacity */
+    rgba(141, 255, 207, 0.10) 89% 
+  );
+  opacity: 1;
+}
+
+.lable-style{
+  font-size: 20;
+  font-weight: 600;
+  color: "#000000";
+  margin: 10;
+
 }
 
 .modal-overlay {
@@ -44,13 +84,31 @@ p {
   z-index: 1000;
 }
 
-
-
-th {
-  padding: 4px;
+.loadingBar{
+    margin-top: 10px;
+    width: 100%;
+    background-color: #f0f0f0;
+    padding: 10px;
+    text-align: center;
 }
-td {
-  padding: 4px;
+
+.dropzone {
+  border: 2px dashed #cccccc;
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+th, td {
+  padding: 15px;
+}
+
+.connect{
+  display: flex;
+  position: absolute;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .social-icons {
@@ -67,7 +125,7 @@ td {
 
 /* Model Styles */
 .modal-content {
-  background-color: white;
+    
   padding: 20px;
   border-radius: 5px;
   width: 90%;
@@ -84,4 +142,10 @@ td {
   border: none;
   font-size: 16px;
   cursor: pointer;
+}
+
+.background {
+  background-image: url('../public/bg.jpg');
+  background-size: cover;
+
 }

@@ -159,13 +159,16 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                 const blob = base64ToBlob(base64String, contentType);
                 return new File([blob], fileName, { type: contentType });
               };
-
+              if (!connectedAddress) {
+                console.error("No connected wallet address found");
+                return;
+              }
               if (redactedFrameData) {
                 const file = base64ToFile(redactedFrameData, `frame_${frameCounter}.jpeg`, "image/jpeg");
                 const s3Url = await uploadFileToS3Bucket({
                   file,
                   taskId: localtaskID,
-                  walletAddress: connectedAddress!,
+                  walletAddress: connectedAddress,
                 });
 
                 frameCounter++;
@@ -181,7 +184,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                 const mutationResponse = await client.models.Media.create({
                   s3address: s3BucketRepsonse,
                   taskId: localtaskID,
-                  walletAddress: connectedAddress!,
+                  walletAddress: connectedAddress,
                 });
 
                 console.log("Media mutation response", mutationResponse);

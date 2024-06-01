@@ -1,21 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { type Schema } from "../ressource";
+import uploadFileToS3Bucket from "../utils/uploadToS3Bucket";
 import ProgressBar from "./ProgressBar";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { fetchFile } from "@ffmpeg/util";
 import { generateClient } from "aws-amplify/api";
 import nlp from "compromise";
 import { openDB } from "idb";
 import Tesseract from "tesseract.js";
 import { useAccount } from "wagmi";
-import uploadFileToS3Bucket from "~~/utils/uploadToS3Bucket";
 
 const VideoCompromise = ({ taskID }: { taskID: string }) => {
   const [completed, setCompleted] = useState(0);
   const [localtaskID] = useState(taskID);
   const [frames, setFrames] = useState<string[]>([]);
   const { address: connectedAddress } = useAccount();
-  const [videoURL, setVideoURL] = useState<string | null>(null);
   let frameCounter = 1;
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -34,11 +32,14 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
   // DB useEffect Hook
   useEffect(() => {
     async function initializeDB() {
-      await openDB("framesDB", 1, {
+      const db = await openDB("framesDB", 1, {
         upgrade(db) {
-          db.createObjectStore("frames", { keyPath: "id", autoIncrement: true });
+          if (!db.objectStoreNames.contains("frames")) {
+            db.createObjectStore("frames", { keyPath: "id", autoIncrement: true });
+          }
         },
       });
+      console.log("Database initialized", db);
     }
     initializeDB();
   }, []);
@@ -145,6 +146,18 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                 image.src = frameDataURL;
               });
 
+              try {
+                await db.put("frames", { frame: redactedFrameData, autoincrement: true });
+              } catch (error) {
+                console.error("Storage quota exceeded:", error);
+                return;
+              }
+              if (currentTime < totalFrames) {
+                captureFrame(currentTime + 1);
+              } else {
+                setFrames(framesArray);
+              }
+
               const base64ToBlob = (base64String: string, contentType: any) => {
                 const byteCharacters = Buffer.from(base64String.split(",")[1], "base64").toString("binary");
                 const byteNumbers = new Array(byteCharacters.length);
@@ -190,17 +203,6 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                 console.log("Media mutation response", mutationResponse);
 
                 //call update Task mutation with walletAddress
-                try {
-                  await db.put("frames", { frame: redactedFrameData, id: currentTime });
-                } catch (error) {
-                  console.error("Storage quota exceeded:", error);
-                  return;
-                }
-                if (currentTime < totalFrames) {
-                  captureFrame(currentTime + 1);
-                } else {
-                  setFrames(framesArray);
-                }
               }
             }
           };
@@ -209,57 +211,6 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
         captureFrame(0);
       };
     }
-  };
-
-  const retrieveFrames = async () => {
-    const db = await openDB("framesDB", 1);
-    const allFrames = await db.getAll("frames");
-    setFrames(allFrames.map(frame => frame.frame));
-  };
-
-  useEffect(() => {
-    retrieveFrames();
-  }, []);
-
-  const createVideo = async () => {
-    const db = await openDB("framesDB", 1);
-    const allFrames = await db.getAll("frames");
-
-    if (!ffmpeg.loaded) {
-      await ffmpeg.load();
-    }
-
-    for (let i = 0; i < allFrames.length; i++) {
-      const frame = allFrames[i].frame;
-      const frameBlob = await fetch(frame).then(res => res.blob());
-      const frameFile = new File([frameBlob], `frame${i}.jpg`, { type: "image/jpeg" });
-      await ffmpeg.writeFile(`frame${i}.jpg`, await fetchFile(frameFile));
-    }
-    //Update frame rate here
-    await ffmpeg.exec([
-      "-r",
-      frameRate.toString(),
-      "-i",
-      "frame%d.jpg",
-      "-c:v",
-      "libx264",
-      "-vf",
-      "fps=25",
-      "-pix_fmt",
-      "yuv420p",
-      "output.mp4",
-    ]);
-
-    const data = await ffmpeg.readFile("output.mp4");
-    const videoBlob = new Blob([data], { type: "video/mp4" });
-    const url = URL.createObjectURL(videoBlob);
-    setVideoURL(url);
-
-    // Cleanup
-    allFrames.forEach((_, i) => {
-      ffmpeg.unmount(`frame${i}.jpg`);
-    });
-    ffmpeg.unmount("output.mp4");
   };
 
   return (
@@ -274,16 +225,6 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
           <img key={index} src={frame} alt={`Frame ${index}`} /> // eslint-disable-line 
         ))}
       </div>
-      <button onClick={createVideo}>Create Video</button>
-      {videoURL && (
-        <div>
-          <h2>Generated Video</h2>
-          <video controls src={videoURL}></video>
-          <a href={videoURL} download="redacted_video.mp4">
-            Download Video
-          </a>
-        </div>
-      )}
     </div>
   );
 };

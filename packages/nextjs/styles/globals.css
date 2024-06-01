@@ -4,11 +4,13 @@
 
 :root,
 [data-theme] {
-  background: oklch(var(--b2));
+  background: rgb(255, 255, 255);
 }
 
 body {
   min-height: 100vh;
+  color:#000000;;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 h1,
@@ -17,10 +19,12 @@ h3,
 h4 {
   margin-bottom: 0.5rem;
   line-height: 1;
+  color:#000000;
 }
 
 p {
   margin: 1rem 0;
+  
 }
 
 .btn {
@@ -47,7 +51,7 @@ p {
   flex: 1;
   height: '100%';
   width: auto;
-  background-color: #6a1b9a;
+  background-color: #b42318;
   border-radius: 'inherit' as const;
   text-align: 'right';
 }
@@ -98,11 +102,20 @@ p {
   padding: 20px;
   text-align: center;
   cursor: pointer;
+  
 }
 
 th, td {
   padding: 15px;
+  border: 1px solid #000;
 }
+
+.black-bar {
+  background-color: #000;
+  color: #fff;
+  padding: 10px;
+}
+
 
 .connect{
   display: flex;
@@ -148,4 +161,8 @@ th, td {
   background-image: url('../public/bg.jpg');
   background-size: cover;
 
+}
+
+.buttonstyle {
+  background: #b42318;
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import outputs from "../amplify_outputs.json";
 import { Amplify } from "aws-amplify";
 import type { NextPage } from "next";
@@ -19,10 +20,16 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <div className="background flex w-full h-full">
+      <div className="flex w-full">
         <SideMenu />
         <div className="flex items-left flex-col flex-grow p-5">
-          <h1 className="flex mt-10 ml-10 font-bold text-2xl">GM Mfers, gimme your data</h1>
+          <Image
+            alt="Playback Network logo"
+            className="cursor-pointer rounded-md"
+            width={280}
+            height={100}
+            src="/logo2copytext.jpg"
+          />
           <span className="block text-l m-2">
             {connectedAddress ? `Connected: ${connectedAddress}` : "Not connected"}
           </span>

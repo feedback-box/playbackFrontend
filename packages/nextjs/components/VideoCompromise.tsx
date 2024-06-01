@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { type Schema } from "../ressource";
 import uploadFileToS3Bucket from "../utils/uploadToS3Bucket";
+import DragAndDrop from "./DragAndDrop";
 import ProgressBar from "./ProgressBar";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { generateClient } from "aws-amplify/api";
 import nlp from "compromise";
 import { openDB } from "idb";
@@ -22,10 +22,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
 
   // IF you want to change the frame rate you HAVE TO CHANGE fmfpeg.exec() in createVideo()
   const frameRate = 5;
-  const ffmpeg = new FFmpeg();
-  ffmpeg.on("log", ({ message }) => {
-    console.log(message);
-  });
+
   const keywordsToRedact = ["ffmpeg", , "medium", "URL", "\\bhttps?://[^\\s]+\\b"];
   console.log("You selected the task" + localtaskID);
 
@@ -44,17 +41,14 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
     initializeDB();
   }, []);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files) return;
-
+  const handleFileChange = async (file: File) => {
     const db = await openDB("framesDB", 1);
     await db.clear("frames");
 
-    const file = URL.createObjectURL(event.target.files[0]);
     const videoElement = videoRef.current;
 
     if (videoElement) {
-      videoElement.src = file;
+      videoElement.src = URL.createObjectURL(file);
       videoElement.onloadedmetadata = () => {
         if (canvasRef.current) {
           canvasRef.current.width = videoElement.videoWidth;
@@ -146,18 +140,6 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                 image.src = frameDataURL;
               });
 
-              try {
-                await db.put("frames", { frame: redactedFrameData, autoincrement: true });
-              } catch (error) {
-                console.error("Storage quota exceeded:", error);
-                return;
-              }
-              if (currentTime < totalFrames) {
-                captureFrame(currentTime + 1);
-              } else {
-                setFrames(framesArray);
-              }
-
               const base64ToBlob = (base64String: string, contentType: any) => {
                 const byteCharacters = Buffer.from(base64String.split(",")[1], "base64").toString("binary");
                 const byteNumbers = new Array(byteCharacters.length);
@@ -199,10 +181,36 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                   taskId: localtaskID,
                   walletAddress: connectedAddress,
                 });
-
                 console.log("Media mutation response", mutationResponse);
 
+                const taskUpdateResponse = await client.models.Task.update({
+                  id: localtaskID,
+                  walletAddress: connectedAddress,
+                });
+
+                console.log("Task update response", taskUpdateResponse);
+
                 //call update Task mutation with walletAddress
+                const idIDB = currentTime.toString();
+                try {
+                  console.log("Attempting to store frame in IndexedDB", redactedFrameData);
+
+                  await db.put("frames", { id: idIDB, frame: redactedFrameData });
+                } catch (error) {
+                  console.error("Storage quota exceeded:", error);
+                  // Handle storage quota exceeded by possibly removing old frames
+                  const allFrames = await db.getAll("frames");
+                  if (allFrames.length > 0) {
+                    await db.delete("frames", allFrames[0].id); // remove the oldest frame
+                    await db.put("frames", { id: idIDB, frame: redactedFrameData });
+                  }
+                }
+
+                if (currentTime < totalFrames) {
+                  captureFrame(currentTime + 1);
+                } else {
+                  setFrames(framesArray);
+                }
               }
             }
           };
@@ -216,7 +224,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
   return (
     <div>
       <h1>Video Frame Extractor</h1>
-      <input type="file" accept="video/webm,video/quicktime" onChange={handleFileChange} />
+      <DragAndDrop onFileAccepted={handleFileChange} />
       <video ref={videoRef} style={{ display: "none" }} />
       <canvas ref={canvasRef} style={{ display: "none" }} />
       <ProgressBar bgcolor="#6a1b9a" completed={completed} />

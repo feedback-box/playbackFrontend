@@ -80,7 +80,7 @@ const TaskTable: React.FC = () => {
 
       <table className="w-full border border-black">
         <thead>
-          <tr className="text-left bg-black text-white  ">
+          <tr className="text-left bg-black text-white">
             <th>Task</th>
             <th>App</th>
             <th>Owners</th>

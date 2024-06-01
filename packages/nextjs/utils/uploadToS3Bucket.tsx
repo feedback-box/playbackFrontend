@@ -23,7 +23,8 @@ const uploadFileToS3Bucket = async ({
       },
     });
     console.log("Result from Response: ", result);
-    const s3Url = `https://YOUR_BUCKET_NAME.s3.amazonaws.com/public/${walletAddress}/${taskId}/raw-images/${file.name}`;
+    const s3BucketName = "amplify-db6s1roouv0tm-dev-bra-mediasbucket5fdfde77-bktlwbdhkr1y";
+    const s3Url = `https://${s3BucketName}.s3.amazonaws.com/public/${walletAddress}/${taskId}/raw-images/${file.name}`;
     return s3Url; // Successful upload
   } catch (error) {
     console.error("Error : ", error);

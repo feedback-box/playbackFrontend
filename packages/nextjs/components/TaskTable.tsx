@@ -1,5 +1,3 @@
-//TODO
-// taskTable.tsx
 import React, { useCallback, useEffect, useState } from "react";
 import { type Schema } from "../ressource";
 import Modal from "./Modal";
@@ -47,13 +45,6 @@ const TaskTable: React.FC = () => {
   /* eslint-enable */
   useEffect(() => {
     fetchTasks();
-    const intervalId = setInterval(() => {
-      fetchTasks(); // Fetch tasks every 5 seconds
-    }, 15000);
-
-    return () => {
-      clearInterval(intervalId); // Clean up the interval when the component unmounts
-    };
   }, [fetchTasks]);
 
   const openModal = (taskID: string) => {
@@ -89,9 +80,7 @@ const TaskTable: React.FC = () => {
               <tr key={task.id}>
                 <td title={task.description ?? ""}>{task.name}</td> {/* Add title attribute with task description */}
                 <td>
-
-                  <img src="../public/uniswap_logo.png" width={35} height={35} alt="logo" className="rounded-full w-35 h-35" />
-
+                  <img src="../public/1inch_logo.png" width={35} height={35} alt="logo" className="rounded-full w-35 h-35" />
                 </td>
                 <td>{task.walletAddress}</td>
                 <td>{task.difficulty}</td>

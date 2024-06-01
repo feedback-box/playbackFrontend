@@ -43,7 +43,7 @@ export const SideMenuLinks = () => {
               href={href}
               passHref
               className={`${
-                isActive ? "bg-secondary shadow-md" : ""
+                isActive ? "bg-white/5 shadow-md" : ""
               } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-row items-center`}
             >
               {icon}
@@ -64,7 +64,7 @@ export const SideMenu = () => {
     useCallback(() => setIsDrawerOpen(false), []),
   );
   return (
-    <div className="side-menu min-h-screen  bg-gray-800/90 p-4 flex flex-col items-center">
+    <div className="side-menu min-h-screen gradient-background p-4 flex flex-col items-center">
       <div className="navbar-start w-auto">
         <div className="drawer-navigation" ref={burgerMenuRef}>
           <Link href="/" className="">
@@ -72,7 +72,7 @@ export const SideMenu = () => {
           </Link>
           <label
             tabIndex={0}
-            className={`btn btn-ghost ${isDrawerOpen ? "hover:bg-secondary" : "hover:bg-transparent"}`}
+            className={`btn btn-ghost ${isDrawerOpen ? "hover:bg-transparent" : "hover:bg-transparent"}`}
             onClick={() => {
               setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
             }}
@@ -80,7 +80,7 @@ export const SideMenu = () => {
             <Bars3Icon className=" h-1/3" />
           </label>
           {isDrawerOpen && (
-            <ul tabIndex={0} className=" mt-3 p-2 shadow w-52">
+            <ul tabIndex={0} className=" mt-3 p-5 w-52">
               <SideMenuLinks />
               <div className="mb-5 pb-10 text-l">Having an Issue? Reach out to us</div>
             </ul>

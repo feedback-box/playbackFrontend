@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { type Schema } from "../ressource";
+import ProgressBar from "./ProgressBar";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import { generateClient } from "aws-amplify/api";
@@ -7,14 +8,20 @@ import nlp from "compromise";
 import { openDB } from "idb";
 import Tesseract from "tesseract.js";
 import { useAccount } from "wagmi";
+import uploadFileToS3Bucket from "~~/utils/uploadToS3Bucket";
 
 const VideoCompromise = ({ taskID }: { taskID: string }) => {
+  const [completed, setCompleted] = useState(0);
   const [localtaskID] = useState(taskID);
   const [frames, setFrames] = useState<string[]>([]);
   const { address: connectedAddress } = useAccount();
   const [videoURL, setVideoURL] = useState<string | null>(null);
+  let frameCounter = 1;
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const client = generateClient<Schema>();
+
   // IF you want to change the frame rate you HAVE TO CHANGE fmfpeg.exec() in createVideo()
   const frameRate = 5;
   const ffmpeg = new FFmpeg();
@@ -23,6 +30,8 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
   });
   const keywordsToRedact = ["ffmpeg", , "medium", "URL", "\\bhttps?://[^\\s]+\\b"];
   console.log("You selected the task" + localtaskID);
+
+  // DB useEffect Hook
   useEffect(() => {
     async function initializeDB() {
       await openDB("framesDB", 1, {
@@ -54,6 +63,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
 
         const totalFrames = Math.floor(videoElement.duration * frameRate);
         const framesArray: string[] = [];
+        const s3Urls: string[] = [];
 
         const captureFrame = (currentTime: number) => {
           if (!canvasRef.current) return;
@@ -63,9 +73,13 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
             const context = canvas?.getContext("2d");
             if (context && canvas?.width && canvas?.height) {
               context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-              const frameData = canvas.toDataURL("image/jpeg");
-              framesArray.push(frameData);
+              const dataURL = canvas.toDataURL("image/jpeg");
+              framesArray.push(dataURL);
 
+              // Calculate the percentage progress based on the current frame and total frames
+              const progress = Math.round((framesArray.length / totalFrames) * 100);
+              setCompleted(progress);
+              // Update the progress state
               //Tesseract OCR
               const result = await Tesseract.recognize(canvas, "eng");
               const {
@@ -116,17 +130,73 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
               // set compression of frames here
 
               const redactedFrameData = canvas.toDataURL("image/jpeg", 0.5);
-              framesArray[framesArray.length - 1] = redactedFrameData;
-              try {
-                await db.put("frames", { frame: redactedFrameData, id: currentTime });
-              } catch (error) {
-                console.error("Storage quota exceeded:", error);
-                return;
-              }
-              if (currentTime < totalFrames) {
-                captureFrame(currentTime + 1);
-              } else {
-                setFrames(framesArray);
+              framesArray.push(redactedFrameData);
+              framesArray.forEach(frameDataURL => {
+                const image = new Image();
+                image.onload = () => {
+                  if (canvasRef.current) {
+                    const canvas = canvasRef.current;
+                    const context = canvas.getContext("2d");
+                    if (context && canvas.width && canvas.height) {
+                      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    }
+                  }
+                };
+                image.src = frameDataURL;
+              });
+
+              const base64ToBlob = (base64String: string, contentType: any) => {
+                const byteCharacters = Buffer.from(base64String.split(",")[1], "base64").toString("binary");
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                  byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                return new Blob([byteArray], { type: contentType });
+              };
+
+              const base64ToFile = (base64String: any, fileName: string, contentType: any) => {
+                const blob = base64ToBlob(base64String, contentType);
+                return new File([blob], fileName, { type: contentType });
+              };
+
+              if (redactedFrameData) {
+                const file = base64ToFile(redactedFrameData, `frame_${frameCounter}.jpeg`, "image/jpeg");
+                const s3Url = await uploadFileToS3Bucket({
+                  file,
+                  taskId: localtaskID,
+                  walletAddress: connectedAddress!,
+                });
+
+                frameCounter++;
+                console.log("Media uploaded to S3", s3Url);
+
+                // collect the response bucket URLs in an array and stringify that array
+                if (s3Url) {
+                  s3Urls.push(s3Url);
+                }
+                const s3BucketRepsonse = JSON.stringify(s3Urls);
+                //send the array to the Media mutation
+
+                const mutationResponse = await client.models.Media.create({
+                  s3address: s3BucketRepsonse,
+                  taskId: localtaskID,
+                  walletAddress: connectedAddress!,
+                });
+
+                console.log("Media mutation response", mutationResponse);
+
+                try {
+                  await db.put("frames", { frame: redactedFrameData, id: currentTime });
+                } catch (error) {
+                  console.error("Storage quota exceeded:", error);
+                  return;
+                }
+                if (currentTime < totalFrames) {
+                  captureFrame(currentTime + 1);
+                } else {
+                  setFrames(framesArray);
+                }
               }
             }
           };
@@ -146,59 +216,6 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
   useEffect(() => {
     retrieveFrames();
   }, []);
-
-  const sendFramesToBackendQL = async () => {
-    const db = await openDB("framesDB", 1);
-    const allFrames = await db.getAll("frames");
-
-    if (!connectedAddress || !localtaskID) {
-      console.error("connectedAddress or taskID is not defined");
-      return;
-    }
-
-    const client = generateClient<Schema>();
-    console.log(client);
-    const framesArray = allFrames.map(({ frame }) => frame);
-
-    try {
-      const response = await client.mutations.createMedias({
-        walletAddress: connectedAddress,
-        taskId: localtaskID,
-        frames: JSON.stringify(framesArray),
-      });
-
-      await console.log("All frames sent successfully", response);
-    } catch (error) {
-      console.error("Failed to send frames to backend:", error);
-    }
-
-    await db.clear("frames");
-    setFrames([]);
-  };
-
-  // const sendFramesToBackend = async () => {
-  //   const db = await openDB("framesDB", 1);
-  //   const allFrames = await db.getAll("frames");
-
-  //   for (const { frame, id } of allFrames) {
-  //     const response = await fetch("https://your-backend-endpoint.com/upload", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ walletAddress, taskID, frame, id }),
-  //     });
-
-  //     if (!response.ok) {
-  //       console.error(`Failed to send frame ${id}`);
-  //       return;
-  //     }
-  //   }
-
-  //   // Clear IndexedDB after successfully sending frames
-  //   await db.clear("frames");
-  //   setFrames([]);
-  // };
 
   const createVideo = async () => {
     const db = await openDB("framesDB", 1);
@@ -247,13 +264,13 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
       <input type="file" accept="video/webm,video/quicktime" onChange={handleFileChange} />
       <video ref={videoRef} style={{ display: "none" }} />
       <canvas ref={canvasRef} style={{ display: "none" }} />
+      <ProgressBar bgcolor="#6a1b9a" completed={completed} />
       <div>
         {frames.map((frame, index) => (
           <img key={index} src={frame} alt={`Frame ${index}`} /> // eslint-disable-line 
         ))}
       </div>
       <button onClick={createVideo}>Create Video</button>
-      <button onClick={sendFramesToBackendQL}>Send Frames to Backend</button>
       {videoURL && (
         <div>
           <h2>Generated Video</h2>

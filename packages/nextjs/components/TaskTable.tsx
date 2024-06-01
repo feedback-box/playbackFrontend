@@ -91,7 +91,7 @@ const TaskTable: React.FC = () => {
         <tbody>
           {tasks.map(task => (
             <tr key={task.id} >
-              <td title={task.description ?? "1"} className="font-bold ">{task.name}</td> {/* Add title attribute with task description */}
+              <td title={task.description ?? "1"} className="font-bold ">{task.name}</td>
               <td className="items-center justify-center">
                 <Image src="/uniswap_logo.png" width={50} height={50} alt="logo" className="rounded-full w-35 h-35" />
               </td>

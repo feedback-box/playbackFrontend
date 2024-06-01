@@ -189,6 +189,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
 
                 console.log("Media mutation response", mutationResponse);
 
+                //call update Task mutation with walletAddress
                 try {
                   await db.put("frames", { frame: redactedFrameData, id: currentTime });
                 } catch (error) {

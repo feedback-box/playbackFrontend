@@ -16,7 +16,6 @@
 
 # production
 /build
-amplify_outputs.json
 
 # misc
 .DS_Store

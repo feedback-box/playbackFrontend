@@ -1,0 +1,427 @@
+{
+  "auth": {
+    "user_pool_id": "ap-southeast-2_i2H8zDdLs",
+    "aws_region": "ap-southeast-2",
+    "user_pool_client_id": "5lip78avjrpsesr6qv0nro17cu",
+    "identity_pool_id": "ap-southeast-2:65efdca6-f8cc-4198-9453-386a1bdbe891",
+    "standard_required_attributes": ["email"],
+    "username_attributes": ["email"],
+    "user_verification_types": ["email"],
+    "password_policy": {
+      "min_length": 8,
+      "require_numbers": true,
+      "require_lowercase": true,
+      "require_uppercase": true,
+      "require_symbols": true
+    },
+    "unauthenticated_identities_enabled": true
+  },
+  "data": {
+    "url": "https://d4iiv7ldc5eehnokaoyc4ppn4y.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+    "aws_region": "ap-southeast-2",
+    "api_key": "da2-s7h7y3vii5ddtkyxfllhqkqdcu",
+    "default_authorization_type": "API_KEY",
+    "authorization_types": ["AMAZON_COGNITO_USER_POOLS", "AWS_IAM"],
+    "model_introspection": {
+      "version": 1,
+      "models": {
+        "Todo": {
+          "name": "Todo",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "content": {
+              "name": "content",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "isDone": {
+              "name": "isDone",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "Todos",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "public",
+                    "provider": "apiKey",
+                    "operations": ["create", "update", "delete", "read"]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "Media": {
+          "name": "Media",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "walletAddress": {
+              "name": "walletAddress",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "taskId": {
+              "name": "taskId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "s3address": {
+              "name": "s3address",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "fileName": {
+              "name": "fileName",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "sizeMb": {
+              "name": "sizeMb",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "Media",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "public",
+                    "provider": "apiKey",
+                    "operations": ["create", "update", "delete", "read"]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "Task": {
+          "name": "Task",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "mediaId": {
+              "name": "mediaId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "walletAddress": {
+              "name": "walletAddress",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "name": {
+              "name": "name",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false,
+              "attributes": []
+            },
+            "difficulty": {
+              "name": "difficulty",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "app": {
+              "name": "app",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "appImage": {
+              "name": "appImage",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "Tasks",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "public",
+                    "provider": "apiKey",
+                    "operations": ["create", "update", "delete", "read"]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "App": {
+          "name": "App",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "name": {
+              "name": "name",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "rank": {
+              "name": "rank",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "tasks": {
+              "name": "tasks",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "published": {
+              "name": "published",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": []
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "Apps",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "public",
+                    "provider": "apiKey",
+                    "operations": ["create", "update", "delete", "read"]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        }
+      },
+      "enums": {},
+      "nonModels": {},
+      "mutations": {
+        "createMedias": {
+          "name": "createMedias",
+          "isArray": false,
+          "type": {
+            "model": "Task"
+          },
+          "isRequired": false,
+          "arguments": {
+            "walletAddress": {
+              "name": "walletAddress",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "taskId": {
+              "name": "taskId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "frames": {
+              "name": "frames",
+              "isArray": false,
+              "type": "AWSJSON",
+              "isRequired": false
+            }
+          }
+        }
+      }
+    }
+  },
+  "storage": {
+    "aws_region": "ap-southeast-2",
+    "bucket_name": "amplify-db6s1roouv0tm-dev-bra-mediasbucket5fdfde77-bktlwbdhkr1y"
+  },
+  "version": "1",
+  "custom": {
+    "API": {
+      "myRestApi": {
+        "endpoint": "https://em6ixb730d.execute-api.ap-southeast-2.amazonaws.com/prod/",
+        "region": "ap-southeast-2",
+        "apiName": "myRestApi"
+      }
+    }
+  }
+}

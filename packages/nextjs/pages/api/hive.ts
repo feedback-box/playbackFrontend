@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let outputFolder = extractLocationURL(stdout);
 
-    res.status(200).json({ stdout, outputFolder });
+    res.status(200).json({ outputFolder });
   } catch (error: any) {
     console.error({ error });
     res.status(500).json({ error: `Execution failed: ${error.message}` });

@@ -73,6 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (code === 0) {
       if (outputFolder) {
         res.status(200).json({ outputFolder });
+        //TODO: @Fabian upload the outputFolder to the s3 bucket
       } else {
         res.status(500).json({ error: `Failed to extract output folder from command output` });
       }

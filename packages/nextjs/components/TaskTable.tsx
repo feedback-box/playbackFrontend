@@ -37,7 +37,6 @@ const TaskTable: React.FC = () => {
       console.error("Error fetching tasks:", error);
     }
   }, []);
-  /* eslint-enable */
 
   useEffect(() => {
     const storedTasks = localStorage.getItem("tasks");
@@ -61,6 +60,7 @@ const TaskTable: React.FC = () => {
 
     return () => clearInterval(intervalId);
   }, [fetchTasks]);
+  /* eslint-enable */
 
   const openModal = (taskID: string) => {
     console.log(`Loaded Task ID: ${taskID}`);

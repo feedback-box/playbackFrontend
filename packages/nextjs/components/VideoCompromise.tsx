@@ -29,7 +29,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
   console.log("You selected the task" + localtaskID);
 
   // DB useEffect Hook
-  // eslint-disable
+  /* eslint-disable */
   useEffect(() => {
     async function initializeDB() {
       const db = await openDB("framesDB", 1, {
@@ -66,7 +66,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
     return () => payloadSubscription.unsubscribe();
   }, [localtaskID, connectedAddress]);
 
-  // eslint-enable
+  /* eslint-enable */
 
   const sendTransaction = async (dataPayload: any, tokenAmount: number) => {
     const contractABI = tokenABI;

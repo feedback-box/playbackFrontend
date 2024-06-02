@@ -16,35 +16,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "Missing inputURI in request body" });
   }
 
-  // doc: get Funds in http://halcyon-faucet.co-ophive.network:8085
-  let pKey = process.env.PRIVATE_KEY || "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
-  let debug: boolean = true;
+  // Set environment variables
+  const pKey = process.env.PRIVATE_KEY || "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
+  const debug = true;
 
-  try {
-    const { stdout, stderr } = await execAsync(`HIVE_PRIVATE_KEY=${pKey} DEBUG=${debug} hive run cowsay:v0.1.2`);
-    console.log({ stdout });
-    if (stderr) {
-      console.error({ stderr });
-      return res.status(500).json({ error: `Error executing command: ${stderr}` });
+  // Construct the command
+  const command = `HIVE_PRIVATE_KEY=${pKey} DEBUG=${debug} hive run cowsay:v0.1.2`;
+
+  // Execute the command
+  const childProcess = exec(command);
+
+  // Handle output
+  let outputFolder: string | null = null;
+  let stderr: string | null = null;
+
+  childProcess.stdout.on("data", data => {
+    console.log(`stdout: ${data}`);
+    outputFolder = extractLocationURL(data.toString());
+  });
+
+  childProcess.stderr.on("data", data => {
+    console.error(`stderr: ${data}`);
+    stderr = data.toString();
+  });
+
+  // Handle command completion
+  childProcess.on("close", code => {
+    console.log(`child process exited with code ${code}`);
+    if (code === 0) {
+      if (outputFolder) {
+        res.status(200).json({ outputFolder });
+      } else {
+        res.status(500).json({ error: `Failed to extract output folder from command output` });
+      }
+    } else {
+      res.status(500).json({ error: `Command execution failed with code ${code}: ${stderr || ""}` });
     }
-
-    let outputFolder = extractLocationURL(stdout);
-
-    res.status(200).json({ outputFolder });
-  } catch (error: any) {
-    console.error({ error });
-    res.status(500).json({ error: `Execution failed: ${error.message}` });
-  }
+  });
 }
 
-//TODO: its easy to extract with cat that with open
-
-export function extractLocationURL(stdout: string): string | null {
-  // Regular expression to find "open: locationURL"
-  // const regex = /open\s+(.*)/;
+// Extract the location URL from the output
+export function extractLocationURL(output: string): string | null {
+  // Match the URL pattern
   const regex = /open\s+(.*)\s+cat\s+.*\s+cat\s+.*\s+(https?:\/\/\S+)/;
-
-  const match = stdout.match(regex);
-  console.log({ match });
+  const match = output.match(regex);
   return match ? match[1] : null;
 }

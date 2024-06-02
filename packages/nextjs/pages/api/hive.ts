@@ -35,6 +35,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
+//TODO: its easy to extract with cat that with open
+
 function extractLocationURL(stdout: string): string | null {
   // Regular expression to find "open: locationURL"
   // const regex = /open\s+(.*)/;

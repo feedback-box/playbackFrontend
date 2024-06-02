@@ -18,12 +18,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { stdout, stderr } = await execAsync(`hive run cowsay:v0.2.0 -i inputURI=${inputURI}`);
-    console.log({stdout, stderr});
+    console.log({stdout});
     if (stderr) {
+      console.error({stderr})
       return res.status(500).json({ error: `Error executing command: ${stderr}` });
     }
     res.status(200).json({ output: stdout });
   } catch (error:any) {
+    console.error({error})
     res.status(500).json({ error: `Execution failed: ${error.message}` });
   }
 }

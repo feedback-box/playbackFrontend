@@ -1,9 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
+"use client";
+
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { type Schema } from "../ressource";
-import Modal from "./Modal";
-import VideoCompromise from "./VideoCompromise";
+import Modal from "../../components/Modal";
+import VideoCompromise from "../../components/VideoCompromise";
+import { type Schema } from "../../ressource";
 import { generateClient } from "aws-amplify/api";
+import "datatables.net";
+import "datatables.net-dt/css/jquery.dataTables.css";
+import $ from "jquery";
 
 interface Task {
   app: string | null;
@@ -22,22 +27,20 @@ interface Task {
 const TaskTable: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTaskID, setSelectedTaskID] = useState<string | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]); // Add state for tasks
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const tableRef = useRef<HTMLTableElement>(null);
   const client = generateClient<Schema>();
 
-  /* eslint-disable */
   const fetchTasks = useCallback(async () => {
     try {
       const response = await client.models.Task.list();
       const taskData = response.data as Task[];
       console.log("Fetched tasks:", taskData);
       setTasks(taskData);
-
     } catch (error) {
       console.error("Error fetching tasks:", error);
     }
   }, []);
-  /* eslint-enable */
 
   useEffect(() => {
     const storedTasks = localStorage.getItem("tasks");
@@ -62,6 +65,12 @@ const TaskTable: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [fetchTasks]);
 
+  useEffect(() => {
+    if (tableRef.current) {
+      $(tableRef.current).DataTable();
+    }
+  }, [tasks]);
+
   const openModal = (taskID: string) => {
     console.log(`Loaded Task ID: ${taskID}`);
     setSelectedTaskID(taskID);
@@ -72,11 +81,10 @@ const TaskTable: React.FC = () => {
     setShowModal(false);
     setSelectedTaskID(null);
   };
-  /* eslint-disable */
+
   return (
     <div className="task-table p-5">
-
-      <table className="w-full border border-black">
+      <table ref={tableRef} className="display w-full border border-black">
         <thead>
           <tr className="text-left bg-black text-white">
             <th>Task</th>
@@ -88,15 +96,19 @@ const TaskTable: React.FC = () => {
         </thead>
         <tbody>
           {tasks.map(task => (
-            <tr key={task.id} >
-              <td title={task.description ?? "1"} className="font-bold ">{task.name}</td>
+            <tr key={task.id}>
+              <td title={task.description ?? "1"} className="font-bold ">
+                {task.name}
+              </td>
               <td className="items-center justify-center">
                 <Image src="/uniswap_logo.png" width={50} height={50} alt="logo" className="rounded-full w-35 h-35" />
               </td>
               <td>{task.walletAddress ? task.walletAddress : <div className="black-bar" />}</td>
               <td>{task.difficulty}</td>
               <td>
-                <button onClick={() => openModal(task.id)} className="buttonstyle px-4 py-2 rounded-lg">Earn</button>
+                <button onClick={() => openModal(task.id)} className="buttonstyle px-4 py-2 rounded-lg">
+                  Earn
+                </button>
               </td>
             </tr>
           ))}

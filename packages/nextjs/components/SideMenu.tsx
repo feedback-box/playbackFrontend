@@ -46,7 +46,7 @@ export const SideMenuLinks = () => {
               passHref
               className={`${
                 isActive ? "bg-black/10 shadow-md" : ""
-              } hover:bg-black hover:text-white hover:shadow-md focus:bg-black focus:text-white active:!text-neutral py-1.5 px-3 text-sm rounded gap-2 flex flex-row items-center`}
+              } hover:bg-black hover:text-white hover:shadow-md focus:bg-black focus:text-white active:!text-neutral py-1.5 px-3 text-sm gap-2 flex flex-row items-center`}
             >
               <div className="flex items-center justify-center w-10 h-10">{icon}</div>
               <span className="flex ml-6">{label}</span>

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import tokenABI from "../contracts/tokenABI.json";
 import { type Schema } from "../ressource";
 import uploadFileToS3Bucket from "../utils/uploadToS3Bucket";
 import DragAndDrop from "./DragAndDrop";
 import ProgressBar from "./ProgressBar";
 import { generateClient } from "aws-amplify/api";
 import nlp from "compromise";
+import { ethers } from "ethers";
 import { openDB } from "idb";
 import Tesseract from "tesseract.js";
 import { useAccount } from "wagmi";
@@ -27,6 +29,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
   console.log("You selected the task" + localtaskID);
 
   // DB useEffect Hook
+  // eslint-disable
   useEffect(() => {
     async function initializeDB() {
       const db = await openDB("framesDB", 1, {
@@ -39,7 +42,55 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
       console.log("Database initialized", db);
     }
     initializeDB();
-  }, []);
+
+    const payloadSubscription = client.models.Task.onUpdate().subscribe({
+      next: async response => {
+        console.log("Task updated", response);
+        const data = response;
+        //TODO unsafe handling of data, good enough for POC
+        if (data.id === localtaskID && data.walletAddress === connectedAddress && data.dataPayload !== "") {
+          console.log("Task updated, initiating transaction", data);
+          const dataPayload = response.dataPayload;
+          const tokenAmount = 5;
+
+          // dataPayload handler for the subscription
+          await sendTransaction(dataPayload, tokenAmount);
+          dataPayload;
+        }
+      },
+      error: error => {
+        console.warn("Subscription error", error);
+      },
+    });
+
+    return () => payloadSubscription.unsubscribe();
+  }, [localtaskID, connectedAddress]);
+
+  // eslint-enable
+
+  const sendTransaction = async (dataPayload: any, tokenAmount: number) => {
+    const contractABI = tokenABI;
+    const contractAddress = process.env.TOKEN_ADDRESS;
+
+    if (!contractAddress) {
+      throw new Error("Contract address is undefined.");
+    }
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+
+    await provider.send("eth_requestAccounts", []);
+
+    const signer = await provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+    try {
+      const transaction = await contract.someMethod(dataPayload, tokenAmount);
+      console.log("Transaction sent:", transaction);
+      const receipt = await transaction.wait();
+      console.log("Transaction confirmed:", receipt);
+    } catch (error) {
+      console.error("Transaction rejected or failed:", error);
+    }
+  };
 
   const handleFileChange = async (file: File) => {
     const db = await openDB("framesDB", 1);
@@ -58,7 +109,6 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
 
         const totalFrames = Math.floor(videoElement.duration * frameRate);
         const framesArray: string[] = [];
-        const s3Urls: string[] = [];
 
         const captureFrame = (currentTime: number) => {
           if (!canvasRef.current) return;
@@ -169,15 +219,8 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                 frameCounter++;
                 console.log("Media uploaded to S3", s3Url);
 
-                // collect the response bucket URLs in an array and stringify that array
-                if (s3Url) {
-                  s3Urls.push(s3Url);
-                }
-                const s3BucketRepsonse = JSON.stringify(s3Urls);
-                //send the array to the Media mutation
-
                 const mutationResponse = await client.models.Media.create({
-                  s3address: s3BucketRepsonse,
+                  s3address: s3Url,
                   taskId: localtaskID,
                   walletAddress: connectedAddress,
                 });
@@ -210,15 +253,50 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                   captureFrame(currentTime + 1);
                 } else {
                   setFrames(framesArray);
+                  await updateTask();
+
+                  await flagFile();
                 }
               }
             }
           };
         };
-
         captureFrame(0);
       };
     }
+  };
+
+  const updateTask = async () => {
+    const taskUpdateResponse = await client.models.Task.update({
+      id: localtaskID,
+      walletAddress: connectedAddress,
+    });
+    console.log("Task update response", taskUpdateResponse);
+  };
+
+  const flagFile = async () => {
+    const fetchTaskName = async (localtaskID: string) => {
+      try {
+        const taskData = await client.models.Task.get({ id: localtaskID });
+        return taskData?.data?.name || "Unknown Task";
+      } catch (error) {
+        console.error("Error fetching task name:", error);
+        return "Unknown Task";
+      }
+    };
+    if (!connectedAddress) {
+      console.error("No connected wallet address found");
+      return;
+    }
+    const taskName = await fetchTaskName(localtaskID);
+    const fileContent = `${taskName} `;
+    const flagFile = new File([fileContent], "play.back", { type: "text/plain" });
+    const flagFileUpload = await uploadFileToS3Bucket({
+      file: flagFile,
+      taskId: localtaskID,
+      walletAddress: connectedAddress,
+    });
+    console.log("Flag file uploaded to S3", flagFileUpload);
   };
 
   return (

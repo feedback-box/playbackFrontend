@@ -37,6 +37,7 @@
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {
+    "@types/jquery": "^3.5.30",
     "@types/ws": "^8.5.10",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3"
@@ -45,7 +46,10 @@
     "node": ">=18.17.0"
   },
   "dependencies": {
+    "datatables.net": "^2.0.8",
+    "datatables.net-dt": "^2.0.8",
     "idb": "^8.0.0",
+    "jquery": "^3.7.1",
     "react-dropzone": "^14.2.3",
     "tesseract.js": "^5.1.0"
   }

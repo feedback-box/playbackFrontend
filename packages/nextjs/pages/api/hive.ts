@@ -18,6 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Set environment variables
   const pKey = process.env.PRIVATE_KEY || "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
+
+  // publicKey: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
   const debug = true;
 
   // Construct the command

@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import type { NextApiRequest, NextApiResponse } from "next";
+import path from "path";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
@@ -22,8 +23,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // publicKey: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
   const debug = true;
 
+  const w = path.dirname(__dirname);
+  let hiveCli = path.join(w, "hive");
+
+  // hiveCli = "hive"
+
   // Construct the command
-  const command = `HIVE_PRIVATE_KEY=${pKey} DEBUG=${debug} hive run cowsay:v0.1.2`;
+  const command = `HIVE_PRIVATE_KEY=${pKey} DEBUG=${debug} ${hiveCli} run cowsay:v0.1.2`;
 
   // Execute the command
   const childProcess = exec(command);

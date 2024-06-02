@@ -31,6 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const platform = process.platform;
   let hiveBin: string = "hive-mac";
 
+  console.log({ platform });
+
   if (platform === "linux") {
     hiveBin = "hive-linux";
   } else if (platform === "darwin") {

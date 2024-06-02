@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const w = path.dirname(__dirname);
   console.log({ w });
   let hiveCli = path.join(w, "hive");
-  hiveCli = path.join("./pages/api/hive");
+  hiveCli = process.env.HIVE_CLI || path.join("./pages/api/hive");
 
   // hiveCli = "hive"
 

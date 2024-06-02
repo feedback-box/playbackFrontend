@@ -18,10 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // doc: get Funds in http://halcyon-faucet.co-ophive.network:8085
   let pKey = process.env.PRIVATE_KEY || "5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a";
+  let debug: boolean = false;
 
   try {
     const { stdout, stderr } = await execAsync(
-      `HIVE_PRIVATE_KEY=${pKey} hive run cowsay:v0.1.2 -i inputURI=${inputURI}`,
+      `HIVE_PRIVATE_KEY=${pKey} DEBUG=${debug} hive run cowsay:v0.1.2 -i inputURI=${inputURI}`,
     );
     console.log({ stdout });
     if (stderr) {

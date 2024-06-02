@@ -10,14 +10,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 
-  const { input } = req.body;
+  const { inputURI } = req.body;
 
-  if (!input) {
-    return res.status(400).json({ error: 'Missing input in request body' });
+  if (!inputURI) {
+    return res.status(400).json({ error: 'Missing inputURI in request body' });
   }
 
   try {
-    const { stdout, stderr } = await execAsync(`hive run cowsay:v0.2.0 -i input=${input}`);
+    const { stdout, stderr } = await execAsync(`hive run cowsay:v0.2.0 -i inputURI=${inputURI}`);
     console.log({stdout, stderr});
     if (stderr) {
       return res.status(500).json({ error: `Error executing command: ${stderr}` });

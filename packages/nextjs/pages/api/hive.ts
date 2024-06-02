@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { platform } from "os";
 import path from "path";
 import { promisify } from "util";
 
@@ -25,8 +26,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const w = path.dirname(__dirname);
   console.log({ w });
-  let hiveCli = path.join(w, "hive");
-  hiveCli = process.env.HIVE_CLI || path.join("./pages/api/hive");
+  let hiveCli: string; // = path.join(w, "hive");
+
+  const platform = process.platform;
+  let hiveBin: string = "hive-mac";
+
+  if (platform === "linux") {
+    hiveBin = "hive-linux";
+  } else if (platform === "darwin") {
+    hiveBin = "hive-mac";
+  }
+  // } else {
+  //   console.error("Unsupported platform");
+  //   process.exit(1);
+  // }
+
+  hiveCli = process.env.HIVE_CLI || path.join("./pages/api/cli", hiveBin);
 
   // hiveCli = "hive"
 

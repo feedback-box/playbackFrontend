@@ -13,7 +13,6 @@ interface Task {
   difficulty: number;
   id: string;
   mediaId: string | null;
-  medias: any | null;
   name: string;
   updatedAt: string;
   walletAddress: string | null;
@@ -96,7 +95,7 @@ const TaskTable: React.FC = () => {
               <td>{task.walletAddress ? task.walletAddress : <div className="black-bar" />}</td>
               <td>{task.difficulty}</td>
               <td>
-                <button onClick={() => openModal(task.id)} className="buttonstyle px-4 py-2 rounded-lg">Earn</button>
+                <button onClick={() => openModal(task.id)} className="buttonstyle px-4 py-2">Earn</button>
               </td>
             </tr>
           ))}

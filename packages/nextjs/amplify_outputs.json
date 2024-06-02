@@ -217,10 +217,24 @@
               "isRequired": false,
               "attributes": []
             },
+            "price": {
+              "name": "price",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
             "difficulty": {
               "name": "difficulty",
               "isArray": false,
               "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "dataPayload": {
+              "name": "dataPayload",
+              "isArray": false,
+              "type": "String",
               "isRequired": false,
               "attributes": []
             },
@@ -414,14 +428,5 @@
     "aws_region": "ap-southeast-2",
     "bucket_name": "amplify-db6s1roouv0tm-dev-bra-mediasbucket5fdfde77-bktlwbdhkr1y"
   },
-  "version": "1",
-  "custom": {
-    "API": {
-      "myRestApi": {
-        "endpoint": "https://em6ixb730d.execute-api.ap-southeast-2.amazonaws.com/prod/",
-        "region": "ap-southeast-2",
-        "apiName": "myRestApi"
-      }
-    }
-  }
+  "version": "1"
 }

@@ -68,22 +68,32 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
 
   /* eslint-enable */
 
+  const sendTx = () => {
+    const dataPayloadHard =
+      "0xeb3d55a8155dc3beb09e8f70712a6f0d5ea81a8fdfca4191bf4c48c0b7a70433414e077e72e328e36a5e3bada66bc908c585f47f8703edd1c117c20b4f0710b61b";
+    const tokenAmount = 100;
+    sendTransaction(dataPayloadHard, tokenAmount);
+  };
+
   const sendTransaction = async (dataPayload: any, tokenAmount: number) => {
     const contractABI = tokenABI;
-    const contractAddress = process.env.TOKEN_ADDRESS;
+    const contractAddress = "0xF00DF8031E2e20F5334A3a4A0FbAaD156B6E58c7";
 
     if (!contractAddress) {
       throw new Error("Contract address is undefined.");
     }
 
+    if (!window.ethereum) {
+      throw new Error("MetaMask is not installed");
+    }
     const provider = new ethers.BrowserProvider(window.ethereum);
 
-    await provider.send("eth_requestAccounts", []);
-
-    const signer = await provider.getSigner();
-    const contract = new ethers.Contract(contractAddress, contractABI, signer);
     try {
-      const transaction = await contract.someMethod(dataPayload, tokenAmount);
+      await provider.send("eth_requestAccounts", []);
+
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, contractABI, signer);
+      const transaction = await contract.mint(dataPayload, tokenAmount, connectedAddress, { gasLimit: 99999999 });
       console.log("Transaction sent:", transaction);
       const receipt = await transaction.wait();
       console.log("Transaction confirmed:", receipt);
@@ -209,44 +219,87 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
                 return;
               }
               if (redactedFrameData) {
-                const file = base64ToFile(redactedFrameData, `frame_${frameCounter}.jpeg`, "image/jpeg");
-                const s3Url = await uploadFileToS3Bucket({
-                  file,
-                  taskId: localtaskID,
-                  walletAddress: connectedAddress,
-                });
-
-                frameCounter++;
-                console.log("Media uploaded to S3", s3Url);
-
-                const mutationResponse = await client.models.Media.create({
-                  s3address: s3Url,
-                  taskId: localtaskID,
-                  walletAddress: connectedAddress,
-                });
-                console.log("Media mutation response", mutationResponse);
-
-                const taskUpdateResponse = await client.models.Task.update({
-                  id: localtaskID,
-                  walletAddress: connectedAddress,
-                });
-
-                console.log("Task update response", taskUpdateResponse);
-
-                //call update Task mutation with walletAddress
-                const idIDB = currentTime.toString();
                 try {
-                  console.log("Attempting to store frame in IndexedDB", redactedFrameData);
+                  const file = base64ToFile(redactedFrameData, `frame_${frameCounter}.jpeg`, "image/jpeg");
+                  const s3Url = await uploadFileToS3Bucket({
+                    file,
+                    taskId: localtaskID,
+                    walletAddress: connectedAddress,
+                  });
 
-                  await db.put("frames", { id: idIDB, frame: redactedFrameData });
-                } catch (error) {
-                  console.error("Storage quota exceeded:", error);
-                  // Handle storage quota exceeded by possibly removing old frames
-                  const allFrames = await db.getAll("frames");
-                  if (allFrames.length > 0) {
-                    await db.delete("frames", allFrames[0].id); // remove the oldest frame
+                  frameCounter++;
+                  console.log("Media uploaded to S3", s3Url);
+
+                  const mutationResponse = await client.models.Media.create({
+                    s3address: s3Url,
+                    taskId: localtaskID,
+                    walletAddress: connectedAddress,
+                  });
+                  console.log("Media mutation response", mutationResponse);
+
+                  const taskUpdateResponse = await client.models.Task.update({
+                    id: localtaskID,
+                    walletAddress: connectedAddress,
+                  });
+
+                  console.log("Task update response", taskUpdateResponse);
+
+                  //call update Task mutation with walletAddress
+                  const idIDB = currentTime.toString();
+                  try {
+                    console.log("Attempting to store frame in IndexedDB", redactedFrameData);
+
                     await db.put("frames", { id: idIDB, frame: redactedFrameData });
+                  } catch (error) {
+                    console.error("Storage quota exceeded:", error);
+                    // Handle storage quota exceeded by possibly removing old frames
+                    const allFrames = await db.getAll("frames");
+                    if (allFrames.length > 0) {
+                      await db.delete("frames", allFrames[0].id); // remove the oldest frame
+                      await db.put("frames", { id: idIDB, frame: redactedFrameData });
+                    }
                   }
+                } catch (error) {
+                  const file = base64ToFile(redactedFrameData, `frame_${frameCounter}.jpeg`, "image/jpeg");
+                  const s3Url = await uploadFileToS3Bucket({
+                    file,
+                    taskId: localtaskID,
+                    walletAddress: connectedAddress,
+                  });
+
+                  frameCounter++;
+                  console.log("Media uploaded to S3", s3Url);
+
+                  const mutationResponse = await client.models.Media.create({
+                    s3address: s3Url,
+                    taskId: localtaskID,
+                    walletAddress: connectedAddress,
+                  });
+                  console.log("Media mutation response", mutationResponse);
+
+                  const taskUpdateResponse = await client.models.Task.update({
+                    id: localtaskID,
+                    walletAddress: connectedAddress,
+                  });
+
+                  console.log("Task update response", taskUpdateResponse);
+
+                  //call update Task mutation with walletAddress
+                  const idIDB = currentTime.toString();
+                  try {
+                    console.log("Attempting to store frame in IndexedDB", redactedFrameData);
+
+                    await db.put("frames", { id: idIDB, frame: redactedFrameData });
+                  } catch (error) {
+                    console.error("Storage quota exceeded:", error);
+                    // Handle storage quota exceeded by possibly removing old frames
+                    const allFrames = await db.getAll("frames");
+                    if (allFrames.length > 0) {
+                      await db.delete("frames", allFrames[0].id); // remove the oldest frame
+                      await db.put("frames", { id: idIDB, frame: redactedFrameData });
+                    }
+                  }
+                  console.error("Error uploading media to S3:", error);
                 }
 
                 if (currentTime < totalFrames) {
@@ -306,6 +359,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
       <video ref={videoRef} style={{ display: "none" }} />
       <canvas ref={canvasRef} style={{ display: "none" }} />
       <ProgressBar bgcolor="#6a1b9a" completed={completed} />
+      <button onClick={sendTx}>Flag File</button>
       <div>
         {frames.map((frame, index) => (
           <img key={index} src={frame} alt={`Frame ${index}`} /> // eslint-disable-line 

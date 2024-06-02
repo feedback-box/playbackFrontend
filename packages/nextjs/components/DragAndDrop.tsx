@@ -60,7 +60,7 @@ const dropzoneStyle: React.CSSProperties = {
   borderRadius: "2px",
   borderColor: "#eeeeee",
   borderStyle: "dashed",
-  backgroundColor: "#fafafa",
+  backgroundColor: "#000000",
   color: "#bdbdbd",
   outline: "none",
   transition: "border .24s ease-in-out",
@@ -69,6 +69,8 @@ const dropzoneStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = {
   cursor: "pointer",
+  fontWeight: "bold",
+  color: "white",
 };
 
 export default DragAndDrop;

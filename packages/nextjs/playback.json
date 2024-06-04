@@ -1,0 +1,9 @@
+{
+  "taskName": "Find @playbacknet on x.com and repost our latest post",
+  "taskId": 1,
+  "description": "A detailed task description goes here.",
+  "additionalInfo": {
+    "priority": "high",
+    "deadline": "2024-07-01T00:00:00Z"
+  }
+}

@@ -51,6 +51,7 @@
     "datatables.net-dt": "^2.0.8",
     "idb": "^8.0.0",
     "jquery": "^3.7.1",
+    "opencv.js": "^1.2.1",
     "papaparse": "^5.4.1",
     "tesseract.js": "^5.1.0"
   }

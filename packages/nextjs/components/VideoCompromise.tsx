@@ -26,7 +26,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
   const frameRate = 5;
 
   const keywordsToRedact = ["ffmpeg", , "medium", "URL", "\\bhttps?://[^\\s]+\\b"];
-  console.log("You selected the task" + localtaskID);
+  console.log("You selected the task " + localtaskID);
 
   // DB useEffect Hook
   /* eslint-disable */
@@ -337,13 +337,14 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
         return "Unknown Task";
       }
     };
+    fetchTaskName(localtaskID);
     if (!connectedAddress) {
       console.error("No connected wallet address found");
       return;
     }
-    const taskName = await fetchTaskName(localtaskID);
-    const fileContent = `${taskName} `;
-    const flagFile = new File([fileContent], "play.back", { type: "text/plain" });
+
+    const fileContent = "../../play.back";
+    const flagFile = new File([fileContent], "play.back", { type: "text/JSON" });
     const flagFileUpload = await uploadFileToS3Bucket({
       file: flagFile,
       taskId: localtaskID,
@@ -359,7 +360,8 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
       <video ref={videoRef} style={{ display: "none" }} />
       <canvas ref={canvasRef} style={{ display: "none" }} />
       <ProgressBar bgcolor="#6a1b9a" completed={completed} />
-      <button onClick={sendTx}>Flag File</button>
+      <button onClick={flagFile}>Flag File</button>
+      <button onClick={sendTx}>Send Tx</button>
       <div>
         {frames.map((frame, index) => (
           <img key={index} src={frame} alt={`Frame ${index}`} /> // eslint-disable-line 

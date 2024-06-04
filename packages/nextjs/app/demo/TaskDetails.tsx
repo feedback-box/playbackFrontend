@@ -97,7 +97,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
     console.log("Flag file uploaded to S3", flagFileUpload);
   };
 
-  /* es-lint-disable */
+  /* eslint-disable */
   useEffect(() => {
     const updateTaskSubscription = async () => {
       const subscription = await client.models.Task.observeQuery().subscribe({

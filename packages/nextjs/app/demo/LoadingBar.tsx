@@ -1,29 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 interface ProgressBarProps {
-  duration: number;
-  onComplete: () => void;
+  progress: number;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ duration, onComplete }) => {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev < 100) {
-          return prev + 1;
-        } else {
-          clearInterval(interval);
-          onComplete();
-          return prev;
-        }
-      });
-    }, duration * 10); // duration in milliseconds
-
-    return () => clearInterval(interval);
-  }, [duration, onComplete]);
-
+const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
   return (
     <div className="w-full bg-gray-300 h-9 overflow-hidden">
       <div

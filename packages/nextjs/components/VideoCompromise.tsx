@@ -121,6 +121,7 @@ const VideoCompromise = ({ taskID }: { taskID: string }) => {
         const framesArray: string[] = [];
 
         const captureFrame = (currentTime: number) => {
+          // take a frame every X, max 20 seconds per video
           if (!canvasRef.current) return;
           videoElement.currentTime = currentTime;
           videoElement.onseeked = async () => {

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Modal from "../../components/Modal";
-import ImageSimilarity from "./ImageSimilarity";
 import TaskDetails from "./TaskDetails";
 import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -156,12 +155,8 @@ const TaskTable: React.FC = () => {
   const startIndex = (currentPage - 1) * tasksPerPage;
   const paginatedTasks = filteredTasks.slice(startIndex, startIndex + tasksPerPage);
 
-  const hardcodedImage1 = "/hardcodedImage1.jpg";
-  const hardcodedImage2 = "/hardcodedImage3.jpg";
-
   return (
     <div className="task-table p-3">
-      <ImageSimilarity image1Url={hardcodedImage1} image2Url={hardcodedImage2} />
       <div className="flex justify-between mb-4">
         <div></div>
         <input

@@ -14,7 +14,6 @@ interface VideoProcessorProps {
 const VideoProcessor: React.FC<VideoProcessorProps> = ({ file, onProgress, onComplete, onError, onFrameProcessed }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRate = 5;
   const keywordsToRedact = ["ffmpeg", "medium", "URL", "\\bhttps?://[^\\s]+\\b", "/@w+/"];
   /* eslint-disable */
   useEffect(() => {
@@ -37,7 +36,8 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({ file, onProgress, onCom
               canvasRef.current.height = videoElement.videoHeight;
             }
 
-            const totalFrames = Math.floor(videoElement.duration * frameRate);
+            const totalFrames = Math.min(Math.ceil(videoElement.duration), 20);
+            const interval = videoElement.duration / totalFrames;
             const framesArray: string[] = [];
 
             const captureFrame = (currentTime: number) => {
@@ -49,16 +49,17 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({ file, onProgress, onCom
                 if (context && canvas?.width && canvas?.height) {
                   context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
                   const dataURL = canvas.toDataURL("image/jpeg");
-                  framesArray.push(dataURL);
 
-                  const progress = Math.round((framesArray.length / totalFrames) * 100);
+
+                  const progress = Math.round((videoElement.duration * 2) * 100);
                   onProgress(progress);
+                  console.log(`Progress: ${progress}%`);
 
                   const result = await Tesseract.recognize(canvas, "eng");
                   const {
                     data: { words },
                   } = result;
-
+                  console.log(result);
                   const normalizedText = words.map(word => word.text.trim().toLowerCase()).join(" ");
                   const doc = nlp(normalizedText);
 
@@ -99,7 +100,7 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({ file, onProgress, onCom
                   });
 
                   const redactedFrameData = canvas.toDataURL("image/jpeg", 0.5); //Compression set to 0.5
-                  framesArray.push(redactedFrameData);
+
                   onFrameProcessed(redactedFrameData); // Callback for each processed frame
 
                   const idIDB = currentTime.toString();
@@ -113,8 +114,8 @@ const VideoProcessor: React.FC<VideoProcessorProps> = ({ file, onProgress, onCom
                     }
                   }
 
-                  if (currentTime < totalFrames) {
-                    captureFrame(currentTime + 1);
+                  if (framesArray.length < totalFrames) {
+                    captureFrame(currentTime + interval);
                   } else {
                     onComplete();
                   }

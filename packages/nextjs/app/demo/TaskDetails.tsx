@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import DragAndDrop from "../../components/DragAndDrop";
 import tokenABI from "../../contracts/tokenABI.json";
+import { type Schema } from "../../ressource";
 import uploadFileToS3Bucket from "../../utils/uploadToS3Bucket";
 import ProgressBar from "./LoadingBar";
 import VideoProcessor from "./VideoProcessor";
+import { generateClient } from "aws-amplify/api";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 
-//
+const client = generateClient<Schema>();
 
 interface Task {
   index: number;
@@ -31,6 +33,10 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
   const [uploadComplete, setUploadComplete] = useState(false);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [redactedFrames, setRedactedFrames] = useState<string[]>([]);
+  const [progress, setProgress] = useState(0);
+  const [dataPayload, setDataPayload] = useState<any>(null);
+  const [additionalTime, setAdditionalTime] = useState(false);
+  const localtaskID = task.index;
 
   const handleFileSubmit = (file: File) => {
     setLoading(true);
@@ -40,11 +46,14 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
 
   const handleProgress = (progress: number) => {
     console.log(`Progress: ${progress}%`);
+    setProgress(progress);
   };
 
   const handleComplete = () => {
     setLoading(false);
     setUploadComplete(true);
+    uploadPlayBackFile();
+    setAdditionalTime(true);
   };
 
   const handleError = (error: Error) => {
@@ -57,24 +66,53 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
     setRedactedFrames(prevFrames => [...prevFrames, frame]);
   };
 
-  const uploadPlayBackFile = async () => {
-    const localtaskID = "1";
+  useEffect(() => {
+    if (additionalTime) {
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return 100;
+          }
+          return prev + 1;
+        });
+      }, 100); // 1% progress every 0.1 seconds for 10 seconds
+      return () => clearInterval(interval);
+    }
+  }, [additionalTime]);
 
+  const uploadPlayBackFile = async () => {
     if (!connectedAddress) {
       console.error("No connected wallet address found");
       return;
     }
-    const taskName =
-      '{"taskName":"SWAP TOKENS ON BASE","description":"A detailed task description goes here.","additionalInfo":{"priority":"high","deadline":"2024-07-01T00:00:00Z"}}';
+    const taskName = `{"taskName":"${task.task}", "taskId": ${task.index} "description":"A detailed task description goes here.","additionalInfo":{"priority":"high","deadline":"2024-07-01T00:00:00Z"}}`;
     const fileContent = `${taskName} `;
     const flagFile = new File([fileContent], "play.back", { type: "text/plain" });
     const flagFileUpload = await uploadFileToS3Bucket({
       file: flagFile,
-      taskId: localtaskID,
+      taskId: localtaskID.toString(),
       walletAddress: connectedAddress,
     });
     console.log("Flag file uploaded to S3", flagFileUpload);
   };
+
+  /* es-lint-disable */
+  useEffect(() => {
+    const updateTaskSubscription = async () => {
+      const subscription = await client.models.Task.observeQuery().subscribe({
+        next: ({ items: dataPayload }) => {
+          setDataPayload(dataPayload);
+        },
+        error: error => {
+          console.error("Error fetching data payload:", error);
+        },
+      });
+      console.log(subscription);
+    };
+    updateTaskSubscription();
+    console.log("Data Payload", dataPayload);
+  }, []);
 
   const sendTx = () => {
     const dataPayloadHard =
@@ -118,7 +156,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
       <DragAndDrop onFileAccepted={handleFileSubmit} />
       {loading && (
         <div className="mt-4">
-          <ProgressBar duration={10} onComplete={handleComplete} />
+          <ProgressBar progress={progress} />
         </div>
       )}
       {videoFile && (
@@ -155,7 +193,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
           </button>
         </p>
       </div>
-      <button onClick={uploadPlayBackFile}>Upload Flag</button>
+
       <div className="mt-4">
         {redactedFrames.map((frame, index) => (
           <img key={index} src={frame} alt={`Redacted Frame ${index}`} className="mb-4" /> // eslint-disable-line

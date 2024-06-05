@@ -2,15 +2,13 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import DragAndDrop from "../../components/DragAndDrop";
 import tokenABI from "../../contracts/tokenABI.json";
-import { type Schema } from "../../ressource";
 import uploadFileToS3Bucket from "../../utils/uploadToS3Bucket";
 import ProgressBar from "./LoadingBar";
 import VideoProcessor from "./VideoProcessor";
-import { generateClient } from "aws-amplify/api";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 
-const client = generateClient<Schema>();
+//
 
 interface Task {
   index: number;
@@ -34,9 +32,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [redactedFrames, setRedactedFrames] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
-  const [dataPayload, setDataPayload] = useState<any>(null);
   const [additionalTime, setAdditionalTime] = useState(false);
-  const localtaskID = task.index;
 
   const handleFileSubmit = (file: File) => {
     setLoading(true);
@@ -52,7 +48,6 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
   const handleComplete = () => {
     setLoading(false);
     setUploadComplete(true);
-    uploadPlayBackFile();
     setAdditionalTime(true);
   };
 
@@ -82,37 +77,23 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
   }, [additionalTime]);
 
   const uploadPlayBackFile = async () => {
+    const localtaskID = "1";
+
     if (!connectedAddress) {
       console.error("No connected wallet address found");
       return;
     }
-    const taskName = `{"taskName":"${task.task}", "taskId": ${task.index} "description":"A detailed task description goes here.","additionalInfo":{"priority":"high","deadline":"2024-07-01T00:00:00Z"}}`;
+    const taskName =
+      '{"taskName":"SWAP TOKENS ON BASE","description":"A detailed task description goes here.","additionalInfo":{"priority":"high","deadline":"2024-07-01T00:00:00Z"}}';
     const fileContent = `${taskName} `;
     const flagFile = new File([fileContent], "play.back", { type: "text/plain" });
     const flagFileUpload = await uploadFileToS3Bucket({
       file: flagFile,
-      taskId: localtaskID.toString(),
+      taskId: localtaskID,
       walletAddress: connectedAddress,
     });
     console.log("Flag file uploaded to S3", flagFileUpload);
   };
-
-  /* eslint-disable */
-  useEffect(() => {
-    const updateTaskSubscription = async () => {
-      const subscription = await client.models.Task.observeQuery().subscribe({
-        next: ({ items: dataPayload }) => {
-          setDataPayload(dataPayload);
-        },
-        error: error => {
-          console.error("Error fetching data payload:", error);
-        },
-      });
-      console.log(subscription);
-    };
-    updateTaskSubscription();
-    console.log("Data Payload", dataPayload);
-  }, []);
 
   const sendTx = () => {
     const dataPayloadHard =
@@ -150,13 +131,14 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
     }
   };
 
+  console.log(progress);
   return (
     <div className="p-4 text-white">
       <h2 className="mb-4 text-white text-4xl font-bold self-center">Earn 25 $BACK</h2>
       <DragAndDrop onFileAccepted={handleFileSubmit} />
       {loading && (
         <div className="mt-4">
-          <ProgressBar progress={progress} />
+          <ProgressBar duration={10} onComplete={handleComplete} />
         </div>
       )}
       {videoFile && (
@@ -193,7 +175,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ task }) => {
           </button>
         </p>
       </div>
-
+      <button onClick={uploadPlayBackFile}>Upload Flag</button>
       <div className="mt-4">
         {redactedFrames.map((frame, index) => (
           <img key={index} src={frame} alt={`Redacted Frame ${index}`} className="mb-4" /> // eslint-disable-line

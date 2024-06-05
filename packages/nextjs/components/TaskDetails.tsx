@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import DragAndDrop from "../../components/DragAndDrop";
-import tokenABI from "../../contracts/tokenABI.json";
-import uploadFileToS3Bucket from "../../utils/uploadToS3Bucket";
-import ProgressBar from "./LoadingBar";
+import ProgressBar from "../app/demo/LoadingBar";
+import tokenABI from "../contracts/tokenABI.json";
+import uploadFileToS3Bucket from "../utils/uploadToS3Bucket";
+import DragAndDrop from "./DragAndDrop";
 import VideoProcessor from "./VideoProcessor";
 import { ethers } from "ethers";
 import { useAccount } from "wagmi";

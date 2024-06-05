@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import outputs from "../amplify_outputs.json";
+import TaskTable from "../components/TaskTable";
 import { Amplify } from "aws-amplify";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import NoSSRWrapper from "~~/components/NoSSRWrapper";
 import SideMenu from "~~/components/SideMenu";
-import TaskTable from "~~/components/TaskTable";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import nlp from "../../utils/nlp-plugins/twitterHandlePlugin";
+import nlp from "../utils/nlp-plugins/twitterHandlePlugin";
 import { openDB } from "idb";
 import Tesseract from "tesseract.js";
 

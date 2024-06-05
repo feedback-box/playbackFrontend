@@ -1,6 +1,6 @@
 import Image from "next/image";
 import outputs from "../../amplify_outputs.json";
-import TaskTable from "./TaskTable";
+import TaskTable from "../../components/TaskTable";
 import { Amplify } from "aws-amplify";
 import { NextPage } from "next";
 import SideMenu from "~~/components/SideMenu";

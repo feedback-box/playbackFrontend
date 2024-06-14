@@ -1,0 +1,9 @@
+GET http://localhost:3000/api/hello
+
+### Test POST request to Next.js API
+POST http://localhost:3000/api/hive
+Content-Type: application/json
+
+{
+  "inputURI": "https://raw.githubusercontent.com/gradio-app/gradio/main/test/test_files/bus.png"
+}
